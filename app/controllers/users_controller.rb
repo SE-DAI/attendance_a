@@ -10,6 +10,8 @@ class UsersController < ApplicationController
   end
   
   def show
+    @first_day = Date.current.beginning_of_month
+    @last_day = @first_day.end_of_month
   end
 
   def new
@@ -48,11 +50,24 @@ class UsersController < ApplicationController
     flash[:success] = "#{@user.name}のデータを削除しました。"
     redirect_to users_url
   end
+
+  def update_basic_info
+    if @user.update_attributes(basic_info_params)
+      flash[:success] = "#{@user.name}の基本情報を更新しました。"
+    else
+      flash[:danger] = "#{@user.name}の更新は失敗しました。<br>" + @user.errors.full_messages.join("<br>")
+    end
+      edirect_to users_url
+  end
   
   private
   
     def user_params
-      params.require(:user).permit(:name, :email, :password, :password_confirmation)
+      params.require(:user).permit(:name, :email, :department, :password, :password_confirmation)
+    end
+
+    def basic_info_params
+      params.require(:user).permit(:department, :basic_time, :work_time)
     end
     
     def set_user
