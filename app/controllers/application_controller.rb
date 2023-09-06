@@ -4,6 +4,10 @@ class ApplicationController < ActionController::Base
 
   $days_of_the_week = %w{日 月 火 水 木 金 土}
 
+  def set_user
+      @user = User.find(params[:id])
+    end
+
     # ページ出力前に1ヶ月分のデータの存在を確認・セットします。
   def set_one_month 
     @first_day = params[:date].nil? ?
@@ -27,6 +31,7 @@ class ApplicationController < ActionController::Base
 
   def logged_in_user
     unless logged_in?
+      store_location
       flash[:danger] = "ログインしてください。"
       redirect_to login_url
     end
