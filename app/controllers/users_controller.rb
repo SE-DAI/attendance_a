@@ -1,15 +1,16 @@
 class UsersController < ApplicationController
-  before_action :set_user, only: %i(show edit update destroy)
-  before_action :logged_in_user, only: %i(index show edit update destroy)
-  before_action :admin_user, only: %i(index destroy)
-  before_action :correct_user, only: %i(edit update)
-  before_action :admin_or_correct, only: %i(show)
+  before_action :set_user, only: [:show, :edit, :update, :destroy, :edit_basic_info, :update_basic_info]
+  before_action :logged_in_user, only: [:index, :edit, :update, :destroy, :edit_basic_info, :update_basic_info]
+  before_action :correct_user, only: [:edit, :update]
+  before_action :admin_user, only: [:destroy, :edit_basic_info, :update_basic_info]
+  before_action :set_one_month, only: :show
   
   def index
     @users = User.paginate(page: params[:page], per_page: 20)
   end
   
   def show
+    @worked_sum = @attendances.where.not(started_at: nil).count
   end
 
   def new
@@ -48,14 +49,24 @@ class UsersController < ApplicationController
     flash[:success] = "#{@user.name}のデータを削除しました。"
     redirect_to users_url
   end
+
+  def update_basic_info
+    if @user.update_attributes(basic_info_params)
+      flash[:success] = "#{@user.name}の基本情報を更新しました。"
+    else
+      flash[:danger] = "#{@user.name}の更新は失敗しました。<br>" + @user.errors.full_messages.join("<br>")
+    end
+      edirect_to users_url
+  end
   
   private
   
     def user_params
-      params.require(:user).permit(:name, :email, :password, :password_confirmation)
+      params.require(:user).permit(:name, :email, :department, :password, :password_confirmation)
+    end
+
+    def basic_info_params
+      params.require(:user).permit(:department, :basic_time, :work_time)
     end
     
-    def set_user
-      @user = User.find(params[:id])
-    end
 end
